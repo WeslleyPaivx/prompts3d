@@ -469,6 +469,22 @@ a { color: inherit; }
 .marca { font-family: var(--sans); font-weight: 560; font-size: 20px; letter-spacing: -.04em; color: var(--creme); }
 .mini-aster { font-size: .6em; vertical-align: .6em; margin-left: 2px; }
 
+
+/* ===== Tela média (tablet / janela estreita) ===== */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .texto { grid-template-columns: 1fr; gap: 0; padding-bottom: 5svh; }
+  .nome { font-size: min(19vw, 26svh); margin-bottom: calc(14px - .22em); }
+  .lado { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; }
+  .frase { font-size: clamp(1rem, 1.9vw, 1.25rem); }
+  .chip-prompt { width: 30vw; }
+  .processo-palco { gap: 3vw; }
+  .dados { grid-template-columns: repeat(3, 1fr); }
+  .dados div:nth-child(4) { border-left: 0; padding-left: 0; }
+  .dados div:nth-child(n+4) { border-top: 1px solid var(--fio); }
+  .cards { grid-template-columns: 1fr 1fr; }
+  .card.destaque { grid-column: 1 / -1; order: -1; }
+}
+
 /* ===== Celular ===== */
 @media (max-width: 760px) {
   .hero { height: 185svh; }
