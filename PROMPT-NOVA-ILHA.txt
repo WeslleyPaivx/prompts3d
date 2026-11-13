@@ -1,0 +1,17 @@
+PROMPT PARA GERAR A NOVA ILHA (cole no ChatGPT, Gemini ou no gerador de imagem que você usa)
+Peça a imagem em formato paisagem (3:2) e com FUNDO TRANSPARENTE (PNG).
+Depois salve como img/ilha.webp (ou ilha.png e troque o nome no index.html).
+
+---
+
+A highly detailed 3D miniature floating island, isometric three-quarter view from slightly above, isolated on a fully transparent background. The base is a chunk of red Brazilian earth with exposed roots, small hanging rocks and vines dangling underneath, exactly like a diorama torn from the ground.
+
+On top of the island, instead of a house, there is a tiny cozy content creator studio:
+- a small modern cabin with a large glass window and warm light inside, a desk with a glowing monitor showing abstract lines of code-like text;
+- a giant vertical smartphone standing upright like a billboard, its screen showing a big white play button;
+- a small cinema camera on a tripod and a ring light pointed at the phone;
+- a few glowing translucent 3D shapes floating above the island (a cube, a sphere and a torus) with soft light trails, like ideas being generated;
+- a film clapperboard leaning on the cabin, cables running on the grass;
+- lush green plants, a mango tree on the left, colorful flowers and small potted plants around the edges.
+
+Warm golden morning sunlight coming from the right, soft shadows, rich saturated colors, tilt-shift miniature look, octane render quality, sharp details. Wide composition with the island centered and nothing cut off at the edges. No logos, no brand names, no readable text, no people.

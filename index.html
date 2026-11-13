@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="pre">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompts IA — Weslley</title>
+  <meta name="description" content="Prompts prontos pra criar vídeos motion e cenas 3D com IA. Copia, cola no Claude e posta.">
+  <meta property="og:title" content="Prompts IA — Weslley">
+  <meta property="og:description" content="Prompts prontos pra criar vídeos motion e cenas 3D com IA.">
+  <meta property="og:image" content="img/ilha.webp">
+  <meta name="theme-color" content="#2b66a3">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" as="image" href="img/ilha.webp" fetchpriority="high">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="pular" href="#pacote">Pular para o conteúdo</a>
+
+  <nav class="nav" id="nav" aria-label="Principal">
+    <a href="#pacote">O pacote</a>
+    <a href="#como">Como funciona</a>
+    <a href="#pacotes">Pacotes</a>
+    <a href="#duvidas">Dúvidas</a>
+  </nav>
+
+  <header class="hero" id="topo">
+    <div class="palco" id="palco">
+
+      <!-- 1. céu -->
+      <div class="camada ceu" data-camada="ceu"><div class="in">
+        <div class="ceu-grad"></div>
+        <svg class="serra" viewBox="0 0 1600 220" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 150 L90 118 L170 132 L260 96 L330 112 L420 80 L500 104 L590 90 L660 60 L740 92 L830 84 L910 108 L1000 70 L1080 96 L1170 88 L1250 110 L1330 78 L1420 100 L1510 92 L1600 112 L1600 220 L0 220 Z" fill="#9cb0c9"/>
+        </svg>
+      </div></div>
+
+      <!-- 2. nuvens de longe -->
+      <div class="camada longe" data-camada="longe"><div class="in" data-nuvens="longe"></div></div>
+
+      <!-- 3. mar de nuvens do horizonte -->
+      <div class="camada horizonte" data-camada="horizonte"><div class="in">
+        <div data-nuvens="horizonte"></div>
+        <div class="nevoa nevoa-horizonte"></div>
+      </div></div>
+
+      <!-- 4. ilha -->
+      <div class="camada ilha" data-camada="ilha"><div class="in">
+        <div class="ilha-caixa">
+          <div class="ilha-nevoa"></div>
+          <div class="flutua">
+            <img src="img/ilha.webp" width="1446" height="994" fetchpriority="high" decoding="async"
+                 alt="Cena 3D em miniatura feita com IA: uma casinha com painéis solares, mangueira, varal colorido, moto vermelha e um cachorro, numa ilha de terra vermelha flutuando no céu.">
+            <div class="ilha-tom" aria-hidden="true"></div>
+          </div>
+          <div class="chip chip-prompt" id="chipPrompt" aria-hidden="true">
+            <span class="chip-rot">✱ prompt</span>
+            <span class="chip-txt"><span id="chipTxt"></span><i class="caret"></i></span>
+          </div>
+          <div class="chip chip-render" id="chipRender" aria-hidden="true">
+            <span class="chip-play"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+            <span><b>Cena 3D</b><small>9:16 · pronta pra postar</small></span>
+          </div>
+        </div>
+      </div></div>
+
+      <!-- 5. nuvens da frente -->
+      <div class="camada frente" data-camada="frente"><div class="in">
+        <div data-nuvens="frente"></div>
+        <div class="nevoa nevoa-frente"></div>
+      </div></div>
+
+      <!-- 6. sombra de nuvem (parada, atrás do texto) -->
+      <div class="sombra"><div class="sombra-in"></div></div>
+
+      <!-- muro de nuvens (saída) -->
+      <div class="muro" id="muro">
+        <div data-nuvens="muro"></div>
+        <div class="nevoa nevoa-muro"></div>
+      </div>
+
+      <div class="veu" id="veu"></div>
+
+      <!-- HUD -->
+      <div class="hud hud-esq" id="hudEsq">
+        <span>Cena 3D · ilha flutuante</span>
+        <span id="hudStatus">Gerando com IA <b id="hudPct">0</b>%</span>
+      </div>
+      <div class="hud hud-dir" id="hudDir">
+        <span>Formato 9:16</span>
+        <span>TikTok · Reels · Kwai</span>
+      </div>
+
+      <!-- 7. texto -->
+      <div class="texto" id="texto">
+        <h1 class="nome">
+          <span class="sr">Prompts IA, por Weslley</span>
+          <span class="linha" aria-hidden="true"><span class="letras" id="letras">Prompts</span><span class="aster" id="aster"><svg viewBox="-50 -50 100 100"><g>
+            <rect x="-7" y="-46" width="14" height="40" rx="7"/><rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(45)"/>
+            <rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(90)"/><rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(135)"/>
+            <rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(180)"/><rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(225)"/>
+            <rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(270)"/><rect x="-7" y="-46" width="14" height="40" rx="7" transform="rotate(315)"/>
+          </g></svg></span></span>
+        </h1>
+        <div class="lado">
+          <p class="frase">
+            <span class="ln"><span>Prompts prontos pra criar vídeos motion</span></span>
+            <span class="ln"><span>e cenas 3D com IA. Copia, cola no Claude</span></span>
+            <span class="ln"><span>e posta conteúdo que para o feed.</span></span>
+          </p>
+          <a class="botao botao-creme" id="botaoHero" href="#pacotes">
+            <span>Ver os pacotes</span>
+            <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i>
+          </a>
+        </div>
+      </div>
+
+      <p class="dica" id="dica" aria-hidden="true">[ role pra ver o que vem no pacote ]</p>
+    </div>
+  </header>
+
+  <main class="conteudo">
+
+    <!-- O pacote -->
+    <section class="bloco fecho" id="pacote">
+      <p class="rotulo" data-revela>[ o que você leva ]</p>
+      <h2 class="titulo" data-palavras>Cenas como essa ilha saem de um prompt bem escrito.</h2>
+      <dl class="dados" data-revela>
+        <div><dt>Conteúdo</dt><dd>Prompts prontos</dd></div>
+        <div><dt>Estilos</dt><dd>Motion e 3D</dd></div>
+        <div><dt>Onde usar</dt><dd>Claude e IAs de vídeo</dd></div>
+        <div><dt>Formato</dt><dd>Vertical 9:16</dd></div>
+        <div><dt>Entrega</dt><dd>Digital, por e-mail</dd></div>
+        <div><dt>Preço</dt><dd>Em breve</dd></div>
+      </dl>
+    </section>
+
+    <!-- faixa de estilos -->
+    <div class="faixas" aria-hidden="true">
+      <div class="faixa" data-faixa="1"><span>Motion ✱ Cenas 3D ✱ Miniaturas ✱ Ilhas flutuantes ✱ Texto animado ✱ Transições ✱ Câmera orbitando ✱&nbsp;</span></div>
+      <div class="faixa faixa-2" data-faixa="-1"><span>Copia ✱ Cola ✱ Gera ✱ Posta ✱ Copia ✱ Cola ✱ Gera ✱ Posta ✱&nbsp;</span></div>
+    </div>
+
+    <!-- Como funciona: palco preso, celular muda com o scroll -->
+    <section class="processo" id="como">
+      <div class="processo-palco">
+        <div class="processo-texto">
+          <p class="rotulo">[ como funciona ]</p>
+          <h2 class="titulo">Do prompt pro post<br>em três passos.</h2>
+          <ol class="etapas" id="etapas">
+            <li class="ativa">
+              <span class="num">01</span>
+              <div><h3>Cola o prompt</h3><p>Cada prompt já descreve a cena, a câmera, a luz e o estilo. Você só copia e cola no Claude.</p></div>
+              <i class="barra"><i></i></i>
+            </li>
+            <li>
+              <span class="num">02</span>
+              <div><h3>A IA gera a cena</h3><p>Troca o tema se quiser (uma cidade, um produto, um personagem) e deixa a IA montar o vídeo.</p></div>
+              <i class="barra"><i></i></i>
+            </li>
+            <li>
+              <span class="num">03</span>
+              <div><h3>Posta na vertical</h3><p>Já sai no formato 9:16, pronto pro TikTok, Reels, Kwai e Shorts. Amanhã tem outro prompt.</p></div>
+              <i class="barra"><i></i></i>
+            </li>
+          </ol>
+        </div>
+
+        <div class="celular" aria-hidden="true">
+          <div class="cel-tela">
+            <!-- tela 1: chat com o prompt -->
+            <div class="tela tela-chat" data-tela="0">
+              <div class="chat-topo"><span class="chat-avatar">✱</span><span>Nova conversa</span></div>
+              <div class="chat-corpo">
+                <div class="bolha bolha-eu"><span id="digita"></span><i class="caret"></i></div>
+                <div class="bolha bolha-ia" id="bolhaIa"><span class="pontos"><i></i><i></i><i></i></span></div>
+              </div>
+              <div class="chat-campo"><span>Escreva ou cole seu prompt</span><b>↑</b></div>
+            </div>
+            <!-- tela 2: gerando -->
+            <div class="tela tela-gera" data-tela="1">
+              <div class="gera-ceu"></div>
+              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="">
+              <img class="gera-nuvem n2" src="img/nuvem-4.webp" alt="">
+              <img class="gera-ilha" id="geraIlha" src="img/ilha.webp" alt="">
+              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="">
+              <div class="gera-veu"></div>
+              <div class="gera-scan" id="geraScan"></div>
+              <div class="gera-status"><span>Gerando cena</span><b id="geraPct">0%</b><i class="gera-barra"><i id="geraBarra"></i></i></div>
+            </div>
+            <!-- tela 3: postado -->
+            <div class="tela tela-post" data-tela="2">
+              <div class="gera-ceu"></div>
+              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="">
+              <img class="post-ilha" src="img/ilha.webp" alt="">
+              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="">
+              <div class="post-lado">
+                <span class="post-ico coracao" id="coracao"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1z"/></svg></span>
+                <span class="post-ico"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v10H9l-5 4z"/></svg></span>
+                <span class="post-ico"><svg viewBox="0 0 24 24"><path d="M14 5l6 6-6 6v-3.6c-5 0-8 1.6-10 5.1.6-5.5 3.6-9.2 10-10z"/></svg></span>
+              </div>
+              <div class="post-legenda"><b>@weslleysxx</b><span>Cena 3D feita com um prompt ✱</span></div>
+              <div class="post-progresso"><i id="postBarra"></i></div>
+            </div>
+          </div>
+          <span class="cel-ilha"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pacotes -->
+    <section class="bloco" id="pacotes">
+      <p class="rotulo" data-revela>[ pacotes ]</p>
+      <h2 class="titulo" data-palavras>Escolhe por onde quer começar.</h2>
+      <div class="cards">
+        <article class="card" data-pacote="motion" data-revela>
+          <span class="brilho"></span>
+          <p class="rotulo">Pacote</p>
+          <h3>Motion</h3>
+          <p>Prompts pra vídeos com texto animado, transições, efeitos e movimento de câmera que prendem nos primeiros segundos.</p>
+          <ul>
+            <li>Vídeos curtos na vertical</li>
+            <li>Texto e tipografia animada</li>
+            <li>Pensado pro Claude</li>
+          </ul>
+          <div class="card-pe">
+            <p class="preco" data-preco>Em breve</p>
+            <a class="botao botao-tinta" data-comprar href="#pacotes"><span>Comprar</span><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i></a>
+          </div>
+        </article>
+
+        <article class="card destaque" data-pacote="combo" data-revela>
+          <span class="brilho"></span>
+          <p class="rotulo">Pacote completo</p>
+          <h3>Motion + 3D</h3>
+          <p>Os dois pacotes juntos, pra alternar entre vídeos animados e cenas 3D e não repetir o estilo no perfil.</p>
+          <ul>
+            <li>Tudo do pacote Motion</li>
+            <li>Tudo do pacote 3D</li>
+            <li>Um pagamento só</li>
+          </ul>
+          <div class="card-pe">
+            <p class="preco" data-preco>Em breve</p>
+            <a class="botao botao-creme" data-comprar href="#pacotes"><span>Comprar</span><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i></a>
+          </div>
+        </article>
+
+        <article class="card" data-pacote="tresd" data-revela>
+          <span class="brilho"></span>
+          <p class="rotulo">Pacote</p>
+          <h3>3D</h3>
+          <p>Prompts pra cenas 3D em miniatura: ilhas flutuantes, casas, objetos e personagens, no estilo da cena lá de cima.</p>
+          <ul>
+            <li>Cenas 3D em miniatura</li>
+            <li>Imagem e vídeo</li>
+            <li>Fácil de trocar o tema</li>
+          </ul>
+          <div class="card-pe">
+            <p class="preco" data-preco>Em breve</p>
+            <a class="botao botao-tinta" data-comprar href="#pacotes"><span>Comprar</span><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i></a>
+          </div>
+        </article>
+      </div>
+      <p class="nota" data-revela>Pagamento pela Cakto, em ambiente seguro. Enquanto a venda não abre, os botões levam pro meu TikTok, onde eu aviso primeiro.</p>
+    </section>
+
+    <!-- Dúvidas -->
+    <section class="bloco" id="duvidas">
+      <p class="rotulo" data-revela>[ dúvidas ]</p>
+      <h2 class="titulo" data-palavras>Antes de comprar.</h2>
+      <div class="faq" data-revela>
+        <details>
+          <summary>Preciso saber programar ou escrever prompt?</summary>
+          <div class="resp"><p>Não. Você copia o prompt, cola na IA e gera. Se quiser, troca o tema por outro (uma cidade, um produto, um personagem) antes de colar.</p></div>
+        </details>
+        <details>
+          <summary>Com qual IA funciona?</summary>
+          <div class="resp"><p>Os prompts são escritos pensando no Claude. Os de cena também servem de base nas ferramentas de imagem e vídeo com IA que você já usa.</p></div>
+        </details>
+        <details>
+          <summary>Como recebo depois de pagar?</summary>
+          <div class="resp"><p>O pagamento é pela Cakto. Com a compra aprovada, o acesso chega no e-mail que você usou na compra.</p></div>
+        </details>
+        <details>
+          <summary>Os vídeos vão viralizar com certeza?</summary>
+          <div class="resp"><p>Ninguém pode garantir isso. O prompt te entrega uma cena bonita e diferente do que todo mundo posta; constância, gancho e teste continuam sendo com você.</p></div>
+        </details>
+        <details>
+          <summary>Posso desistir da compra?</summary>
+          <div class="resp"><p>Sim. Compra feita pela internet tem 7 dias de arrependimento pelo Código de Defesa do Consumidor.</p></div>
+        </details>
+        <details>
+          <summary>Quando abre a venda?</summary>
+          <div class="resp"><p>Em breve. Acompanha no TikTok <a data-tiktok href="https://www.tiktok.com/@weslleysxx" rel="noopener" target="_blank">@weslleysxx</a> pra saber primeiro.</p></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Final: sai da nuvem de volta pro céu -->
+    <section class="final" id="final">
+      <div class="final-nuvens" data-nuvens-final></div>
+      <div class="final-conteudo">
+        <p class="rotulo">[ a próxima cena ]</p>
+        <h2 class="final-titulo" data-palavras>A próxima cena pode sair do seu prompt.</h2>
+        <a class="botao botao-creme" href="#pacotes">
+          <span>Ver os pacotes</span>
+          <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i>
+        </a>
+      </div>
+      <div class="final-ilha" id="finalIlha"><img src="img/ilha.webp" alt="" loading="lazy"></div>
+      <footer class="rodape">
+        <span class="marca">Prompts<span class="mini-aster" aria-hidden="true">✱</span></span>
+        <span>Weslley · Prompts IA</span>
+        <a data-tiktok href="https://www.tiktok.com/@weslleysxx" rel="noopener" target="_blank">TikTok @weslleysxx</a>
+      </footer>
+    </section>
+  </main>
+
+  <div class="grao" id="grao" aria-hidden="true"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
