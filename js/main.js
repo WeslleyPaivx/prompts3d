@@ -5,6 +5,11 @@
   const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const celularMQ = window.matchMedia('(max-width: 760px)');
   const toque = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  // celular com navegador moderno: o topo anda com a rolagem direto na GPU (CSS scroll-driven),
+  // sem JS por quadro. Sem suporte (navegador antigo), cai no laço em JS de sempre.
+  const rolagemCSS = toque && !reduz && !!(window.CSS && CSS.supports &&
+    CSS.supports('animation-timeline: view()') && CSS.supports('animation-range: contain 0% contain 100%'));
+  if (rolagemCSS) doc.classList.add('sd');
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -83,6 +88,18 @@
     $$('[data-nuvens]').forEach(box => {
       const nome = box.dataset.nuvens;
       box.textContent = '';
+      // no toque, as nuvens de cada faixa ficam paradas dentro de UMA camada que balança devagar
+      // (antes: cada nuvem era uma camada própria na GPU, 17 no celular)
+      const grupo = document.createElement('div');
+      grupo.className = 'deriva';
+      box.appendChild(grupo);
+      if (toque && !reduz) {
+        const amp = (VEL[nome] * u * 9).toFixed(1);
+        const an = grupo.animate([{ transform: `translate3d(-${amp}px,0,0)` }, { transform: `translate3d(${amp}px,0,0)` }],
+          { duration: 14000 / VEL[nome], delay: -Math.random() * 14000, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
+        if (!palcoVisivel) an.pause();
+        derivas.push(an);
+      }
       lay[nome].forEach(([n, x, cy, w, e, a]) => {
         const [nw, nh] = TAM[n];
         const wpx = w * u, hpx = wpx * nh / nw;
@@ -95,7 +112,8 @@
         el.className = 'nuvem' + (e ? ' e' : '');
         el.style.cssText = `width:${wpx}px;left:${inicio}px;top:${cy * A - hpx / 2}px;` +
           `--blur:${cel ? 0 : (BLUR[nome] * u / 14).toFixed(2)}px;` + (a ? `opacity:${a};` : '');
-        if (reduz) el.style.transform = `translate3d(${fase * percurso}px,0,0)`;
+        // translate 2D de propósito: translate3d criaria uma camada de GPU para cada nuvem
+        if (reduz || toque) el.style.transform = `translate(${(fase * percurso).toFixed(1)}px,0)`;
         else {
           const a = el.animate([{ transform: 'translate3d(0,0,0)' }, { transform: `translate3d(${percurso.toFixed(1)}px,0,0)` }],
             { duration: dur * 1000, delay: -fase * dur * 1000, iterations: Infinity, easing: 'linear' });
@@ -108,7 +126,7 @@
         img.decoding = 'async';
         img.width = nw; img.height = nh;
         el.appendChild(img);
-        box.appendChild(el);
+        grupo.appendChild(el);
         imgsNuvem.push(img);
       });
     });
@@ -243,7 +261,7 @@
     requestAnimationFrame(quadro);
   }
   function ligaQuadro() {
-    if (rodando || !liberado || reduz) return;
+    if (rodando || !liberado || reduz || rolagemCSS) return;
     rodando = true;
     requestAnimationFrame(t => { tAnt = t - 16.67; quadro(t); });
   }

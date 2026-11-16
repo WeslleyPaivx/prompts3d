@@ -124,6 +124,7 @@ a { color: inherit; }
   will-change: transform;
 }
 .nuvem img { width: 100%; height: auto; }
+.deriva { position: absolute; inset: 0; }
 .nuvem.e img { transform: scaleX(-1); }
 .longe .nuvem img { filter: saturate(.78) brightness(1.03) contrast(.86) blur(var(--blur, 0px)); }
 .horizonte .nuvem img { filter: saturate(.9) contrast(.92) blur(var(--blur, 0px)); }
@@ -555,6 +556,43 @@ a { color: inherit; }
   .faq summary:hover { padding-left: 0; }
   .ilha-tom { -webkit-mask-image: url(../img/ilha-m.webp); mask-image: url(../img/ilha-m.webp); }
 }
+
+/* ===== Topo no celular: animação ligada à rolagem (roda na GPU, sem atraso) ===== */
+@media (hover: none), (pointer: coarse) {
+  .nuvem { will-change: auto; }
+  .deriva { will-change: transform; }
+}
+@supports (animation-timeline: view()) {
+  /* progresso 0 → 1 enquanto o topo (200svh) passa: igual ao "p" do JS */
+  html.sd .hero { view-timeline: --topo block; }
+  html.sd .camada, html.sd .muro, html.sd .veu, html.sd .sombra, html.sd .texto, html.sd .hud {
+    animation-timeline: --topo; animation-range: contain 0% contain 100%;
+    animation-duration: auto; animation-fill-mode: both; animation-timing-function: linear;
+    animation-iteration-count: 1;
+  }
+  html.sd .ceu { animation-name: sd-ceu; }
+  html.sd .longe { animation-name: sd-longe; }
+  html.sd .horizonte { animation-name: sd-horizonte; }
+  html.sd .ilha { animation-name: sd-ilha, sd-ilha-op; }
+  html.sd .frente { animation-name: sd-frente; }
+  html.sd .muro { animation-name: sd-muro; }
+  html.sd .veu { animation-name: sd-veu; }
+  html.sd .sombra { animation-name: sd-sombra; }
+  html.sd .texto { animation-name: sd-texto, sd-some; }
+  html.sd .hud { animation-name: sd-hud; }
+}
+@keyframes sd-ceu { to { transform: translate3d(0, -6svh, 0); } }
+@keyframes sd-longe { to { transform: translate3d(0, -16svh, 0); } }
+@keyframes sd-horizonte { to { transform: translate3d(0, -32svh, 0); } }
+@keyframes sd-ilha { to { transform: translate3d(0, -60svh, 0) scale(.86); } }
+@keyframes sd-ilha-op { 0%, 28% { opacity: 1; animation-timing-function: cubic-bezier(.42, 0, .58, 1); } 58%, 100% { opacity: 0; } }
+@keyframes sd-frente { to { transform: translate3d(0, -125svh, 0) scale(1.38); } }
+@keyframes sd-muro { from { transform: translate3d(0, 116svh, 0); } to { transform: translate3d(0, -46svh, 0); } }
+@keyframes sd-veu { 0%, 50% { opacity: 0; animation-timing-function: cubic-bezier(.42, 0, .58, 1); } 100% { opacity: 1; } }
+@keyframes sd-sombra { 0%, 2% { opacity: 1; animation-timing-function: cubic-bezier(.42, 0, .58, 1); } 30%, 100% { opacity: 0; } }
+@keyframes sd-texto { to { transform: translate3d(0, -62svh, 0); } }
+@keyframes sd-some { 0%, 2% { opacity: 1; animation-timing-function: cubic-bezier(.42, 0, .58, 1); } 30%, 100% { opacity: 0; } }
+@keyframes sd-hud { 0% { opacity: 1; animation-timing-function: cubic-bezier(.42, 0, .58, 1); } 22%, 100% { opacity: 0; } }
 
 /* ===== Movimento reduzido ===== */
 @media (prefers-reduced-motion: reduce) {
