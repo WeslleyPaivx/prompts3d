@@ -18,6 +18,7 @@ motion: { preco: 'R$ 27', checkout: 'https://pay.cakto.com.br/SEU-LINK' },
 - Textos: tudo em `index.html`.
 - Cores e fontes: topo de `css/style.css` (bloco `:root`).
 - Ilha: troque `img/ilha.webp` por outra imagem PNG/WebP com fundo transparente, no mesmo enquadramento (1446 × 994).
+  Troque também `img/ilha-m.webp` (versão menor, 1000 × 687, usada no celular pra rolar liso).
 
 ## Publicar na Vercel
 1. Entre em vercel.com → Add New → Project.
@@ -26,3 +27,8 @@ motion: { preco: 'R$ 27', checkout: 'https://pay.cakto.com.br/SEU-LINK' },
 
 Para testar no PC: abra a pasta no VS Code e use a extensão Live Server
 (abrir o `index.html` direto com dois cliques também funciona, mas o tom da ilha só aparece com servidor).
+
+## Desempenho no celular
+No celular o site desliga os efeitos que pesam na GPU (grão animado e desfoque de fundo)
+e troca por cores sólidas com a mesma aparência. Se for adicionar efeitos novos, evite
+`backdrop-filter`, `mix-blend-mode` e animar `top`/`height` — use `transform` e `opacity`.

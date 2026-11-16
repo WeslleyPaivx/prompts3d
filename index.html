@@ -10,7 +10,8 @@
   <meta property="og:image" content="img/ilha.webp">
   <meta name="theme-color" content="#2b66a3">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preload" as="image" href="img/ilha.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="img/ilha-m.webp" media="(max-width: 760px)" fetchpriority="high">
+  <link rel="preload" as="image" href="img/ilha.webp" media="(min-width: 761px)" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
@@ -51,8 +52,8 @@
         <div class="ilha-caixa">
           <div class="ilha-nevoa"></div>
           <div class="flutua">
-            <img src="img/ilha.webp" width="1446" height="994" fetchpriority="high" decoding="async"
-                 alt="Cena 3D em miniatura feita com IA: uma casinha com painéis solares, mangueira, varal colorido, moto vermelha e um cachorro, numa ilha de terra vermelha flutuando no céu.">
+            <picture><source media="(max-width: 760px)" srcset="img/ilha-m.webp" width="1000" height="687"><img src="img/ilha.webp" width="1446" height="994" fetchpriority="high" decoding="async"
+                 alt="Cena 3D em miniatura feita com IA: uma casinha com painéis solares, mangueira, varal colorido, moto vermelha e um cachorro, numa ilha de terra vermelha flutuando no céu."></picture>
             <div class="ilha-tom" aria-hidden="true"></div>
           </div>
           <div class="chip chip-prompt" id="chipPrompt" aria-hidden="true">
@@ -182,10 +183,10 @@
             <!-- tela 2: gerando -->
             <div class="tela tela-gera" data-tela="1">
               <div class="gera-ceu"></div>
-              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="">
-              <img class="gera-nuvem n2" src="img/nuvem-4.webp" alt="">
-              <img class="gera-ilha" id="geraIlha" src="img/ilha.webp" alt="">
-              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="">
+              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="" loading="lazy" decoding="async">
+              <img class="gera-nuvem n2" src="img/nuvem-4.webp" alt="" loading="lazy" decoding="async">
+              <picture><source media="(max-width: 760px)" srcset="img/ilha-m.webp"><img class="gera-ilha" id="geraIlha" src="img/ilha.webp" alt="" loading="lazy" decoding="async"></picture>
+              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="" loading="lazy" decoding="async">
               <div class="gera-veu"></div>
               <div class="gera-scan" id="geraScan"></div>
               <div class="gera-status"><span>Gerando cena</span><b id="geraPct">0%</b><i class="gera-barra"><i id="geraBarra"></i></i></div>
@@ -193,9 +194,9 @@
             <!-- tela 3: postado -->
             <div class="tela tela-post" data-tela="2">
               <div class="gera-ceu"></div>
-              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="">
-              <img class="post-ilha" src="img/ilha.webp" alt="">
-              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="">
+              <img class="gera-nuvem n1" src="img/nuvem-2.webp" alt="" loading="lazy" decoding="async">
+              <picture><source media="(max-width: 760px)" srcset="img/ilha-m.webp"><img class="post-ilha" src="img/ilha.webp" alt="" loading="lazy" decoding="async"></picture>
+              <img class="gera-nuvem n3" src="img/nuvem-6.webp" alt="" loading="lazy" decoding="async">
               <div class="post-lado">
                 <span class="post-ico coracao" id="coracao"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1z"/></svg></span>
                 <span class="post-ico"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v10H9l-5 4z"/></svg></span>
@@ -309,7 +310,7 @@
           <i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></i>
         </a>
       </div>
-      <div class="final-ilha" id="finalIlha"><img src="img/ilha.webp" alt="" loading="lazy"></div>
+      <div class="final-ilha" id="finalIlha"><picture><source media="(max-width: 760px)" srcset="img/ilha-m.webp"><img src="img/ilha.webp" alt="" loading="lazy" decoding="async"></picture></div>
       <footer class="rodape">
         <span class="marca">Prompts<span class="mini-aster" aria-hidden="true">✱</span></span>
         <span>Weslley · Prompts IA</span>

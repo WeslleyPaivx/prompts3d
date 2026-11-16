@@ -4,6 +4,7 @@
   const doc = document.documentElement;
   const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const celularMQ = window.matchMedia('(max-width: 760px)');
+  const toque = window.matchMedia('(hover: none), (pointer: coarse)').matches;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -31,8 +32,10 @@
   });
   if (loja.tiktok) $$('[data-tiktok]').forEach(a => { a.href = loja.tiktok; });
 
-  /* ---------- Grão (um só, por cima de tudo) ---------- */
+  /* ---------- Grão (um só, por cima de tudo) — só no PC; no celular fica escondido pelo CSS ---------- */
   (() => {
+    const g = $('#grao');
+    if (!g || getComputedStyle(g).display === 'none') return;
     const c = document.createElement('canvas');
     c.width = c.height = 180;
     const ctx = c.getContext('2d');
@@ -43,7 +46,7 @@
       img.data[i + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
-    $('#grao').style.backgroundImage = `url(${c.toDataURL()})`;
+    g.style.backgroundImage = `url(${c.toDataURL()})`;
   })();
 
   /* ---------- Nuvens ---------- */
@@ -68,8 +71,11 @@
 
   const palco = $('#palco');
   const imgsNuvem = [];
+  // deriva das nuvens via Web Animations com valores fixos: roda 100% na GPU (iPhone e Android)
+  let derivas = [], palcoVisivel = true;
 
   function montarNuvens() {
+    derivas.forEach(a => a.cancel()); derivas = [];
     const L = palco.clientWidth, A = palco.clientHeight;
     const cel = celularMQ.matches;
     const u = cel ? Math.max(L, .62 * A) / 100 : Math.min(L, 1.9 * A) / 100;
@@ -88,9 +94,14 @@
         const el = document.createElement('div');
         el.className = 'nuvem' + (e ? ' e' : '');
         el.style.cssText = `width:${wpx}px;left:${inicio}px;top:${cy * A - hpx / 2}px;` +
-          `--dx:${percurso}px;--dur:${dur}s;--atraso:${-fase * dur}s;` +
-          `--blur:${(BLUR[nome] * u / 14).toFixed(2)}px;` + (a ? `opacity:${a};` : '');
+          `--blur:${cel ? 0 : (BLUR[nome] * u / 14).toFixed(2)}px;` + (a ? `opacity:${a};` : '');
         if (reduz) el.style.transform = `translate3d(${fase * percurso}px,0,0)`;
+        else {
+          const a = el.animate([{ transform: 'translate3d(0,0,0)' }, { transform: `translate3d(${percurso.toFixed(1)}px,0,0)` }],
+            { duration: dur * 1000, delay: -fase * dur * 1000, iterations: Infinity, easing: 'linear' });
+          if (!palcoVisivel) a.pause();
+          derivas.push(a);
+        }
         const img = new Image();
         img.src = `img/nuvem-${n}.webp`;
         img.alt = '';
@@ -112,12 +123,19 @@
       if (window.innerWidth !== larguraAnt || celularMQ.matches !== celAnt) {
         larguraAnt = window.innerWidth; celAnt = celularMQ.matches;
         montarNuvens();
+        faixas.forEach(f => { f.w = f.span.offsetWidth || 1; f.x = null; });
       }
+      heroAltura = hero.offsetHeight; telaAltura = window.innerHeight; palcoAltura = palco.clientHeight;
+      chaveAnt = ''; ligaQuadro(); pedeRolagem();
     }, 180);
   });
 
   /* pausa a deriva com o hero fora da tela */
-  new IntersectionObserver(([en]) => palco.classList.toggle('pausa', !en.isIntersecting)).observe(palco);
+  new IntersectionObserver(([en]) => {
+    palcoVisivel = en.isIntersecting;
+    palco.classList.toggle('pausa', !palcoVisivel);
+    derivas.forEach(a => palcoVisivel ? a.play() : a.pause());
+  }).observe(palco);
 
   /* ---------- Nome letra a letra ---------- */
   const letras = $('#letras');
@@ -125,9 +143,16 @@
 
   /* ---------- Nav: some ao descer, volta ao subir ---------- */
   const nav = $('#nav');
-  let yAnt = window.scrollY;
+  const hero = $('#topo');
+  let heroAltura = hero.offsetHeight, telaAltura = window.innerHeight;
+  let yAnt = window.scrollY, solidaAnt = null;
+  function navSolida(y) {
+    const s = y > (heroAltura - telaAltura) * .82;
+    if (s !== solidaAnt) { nav.classList.toggle('solida', s); solidaAnt = s; }
+  }
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
+    navSolida(y);
     if (y < 40) nav.classList.remove('escondida');
     else if (y > yAnt + 4) nav.classList.add('escondida');
     else if (y < yAnt - 4) nav.classList.remove('escondida');
@@ -149,7 +174,6 @@
   }
 
   /* ---------- Palco: cursor + saída ---------- */
-  const hero = $('#topo');
   const camadas = {};
   $$('[data-camada]').forEach(el => { camadas[el.dataset.camada] = el; });
   const CFG = {
@@ -174,20 +198,25 @@
   }
 
   function alvoP() {
-    const curso = hero.offsetHeight - window.innerHeight;
+    const curso = heroAltura - telaAltura;
     if (curso <= 0) return 0;
-    return clamp(-hero.getBoundingClientRect().top / curso, 0, 1);
+    return clamp(window.scrollY / curso, 0, 1);
   }
+  let palcoAltura = palco.clientHeight;
 
-  let tAnt = performance.now();
+  let tAnt = performance.now(), rodando = false, liberado = false;
+  // no toque a rolagem já tem inércia própria: suavização menor = sem sensação de atraso
+  const SUAVE = toque ? .3 : .16;
   function quadro(t) {
     const dt = Math.min(64, t - tAnt) / 16.67; tAnt = t;
-    const kP = 1 - Math.pow(1 - .16, dt), kM = 1 - Math.pow(1 - .05, dt);
+    const kP = 1 - Math.pow(1 - SUAVE, dt), kM = 1 - Math.pow(1 - .05, dt);
     const pa = alvoP();
     p += (pa - p) * kP; if (Math.abs(pa - p) < .0004) p = pa;
     mx += (mxAlvo - mx) * kM; my += (myAlvo - my) * kM;
+    if (Math.abs(mxAlvo - mx) < .001) mx = mxAlvo;
+    if (Math.abs(myAlvo - my) < .001) my = myAlvo;
 
-    const A = palco.clientHeight;
+    const A = palcoAltura;
     const chave = `${p.toFixed(4)}|${mx.toFixed(3)}|${my.toFixed(3)}|${A}`;
     if (chave !== chaveAnt) {
       chaveAnt = chave;
@@ -208,9 +237,19 @@
       const oh = (1 - smooth(0, .22, p)).toFixed(3);
       huds.forEach(h => { h.style.opacity = oh; });
     }
-    nav.classList.toggle('solida', p > .82 || window.scrollY > hero.offsetHeight - window.innerHeight);
+    // assentou e o topo saiu da tela: desliga o laço (volta sozinho ao rolar de novo)
+    // parado: espera o próximo scroll/mouse em vez de girar à toa
+    if (p === pa && mx === mxAlvo && my === myAlvo) { rodando = false; return; }
     requestAnimationFrame(quadro);
   }
+  function ligaQuadro() {
+    if (rodando || !liberado || reduz) return;
+    rodando = true;
+    requestAnimationFrame(t => { tAnt = t - 16.67; quadro(t); });
+  }
+  window.addEventListener('scroll', ligaQuadro, { passive: true });
+  if (temMouse) window.addEventListener('pointermove', ligaQuadro, { passive: true });
+
 
   /* ---------- Entrada em camadas ---------- */
   const EXPO = 'cubic-bezier(.16,1,.3,1)', P3 = 'cubic-bezier(.215,.61,.355,1)', P2IO = 'cubic-bezier(.455,.03,.515,.955)';
@@ -270,6 +309,7 @@
   else {
     let pi = 0, ci = 0, apagando = false;
     (function digita() {
+      if (palco.classList.contains('pausa')) return setTimeout(digita, 500);
       const alvo = PROMPTS[pi];
       if (!apagando) {
         ci++;
@@ -302,8 +342,10 @@
      ========================================================= */
   const faixas = $$('[data-faixa]').map(f => {
     const span = f.querySelector('span');
-    for (let i = 0; i < 3; i++) f.appendChild(span.cloneNode(true));
-    return { el: f, dir: +f.dataset.faixa, span };
+    const w = span.offsetWidth || 1;
+    const copias = Math.ceil(window.innerWidth / w) + 1;
+    for (let i = 0; i < copias; i++) f.appendChild(span.cloneNode(true));
+    return { el: f, dir: +f.dataset.faixa, span, w, x: null };
   });
 
   /* =========================================================
@@ -316,11 +358,15 @@
   const digitaEl = $('#digita'), bolhaIa = $('#bolhaIa');
   const telaGera = $('.tela-gera'), geraPct = $('#geraPct'), coracao = $('#coracao');
   const TXT_PROMPT = 'Crie uma cena 3D em miniatura: uma ilha de terra vermelha flutuando no céu da manhã, com uma casinha, painéis solares e varal colorido. Câmera orbitando devagar, luz dourada, formato 9:16.';
-  let etapaAnt = -1, iaRespondeu = false;
+  let etapaAnt = -1, iaRespondeu = false, mostraAnt = null, nAnt = -1, gAnt = -1, celAnt2 = '';
+  const barras = etapas.map(li => li.querySelector('.barra i'));
+  const progAnt = [-1, -1, -1];
+  const geraVeu = $('.gera-veu', telaGera), geraScan = $('#geraScan'), geraBarra = $('#geraBarra');
 
-  function atualizaProcesso() {
-    const r = processo.getBoundingClientRect();
-    const curso = processo.offsetHeight - window.innerHeight;
+  // r = posição já lida no laço de scroll (evita ler o layout duas vezes)
+  function atualizaProcesso(r) {
+    r = r || processo.getBoundingClientRect();
+    const curso = processo.offsetHeight - telaAltura;
     const q = clamp(-r.top / curso, 0, 1);
     const cortes = [0, .34, .67, 1];
     let etapa = q < cortes[1] ? 0 : q < cortes[2] ? 1 : 2;
@@ -332,39 +378,59 @@
       if (etapa === 2) { coracao.classList.remove('pop'); void coracao.offsetWidth; coracao.classList.add('pop'); }
       etapaAnt = etapa;
     }
-    etapas.forEach((li, i) => li.querySelector('.barra i').style.setProperty('--prog', i < etapa ? 1 : i === etapa ? local.toFixed(3) : 0));
+    barras.forEach((b, i) => {
+      const v = i < etapa ? 1 : i === etapa ? Math.round(local * 400) / 400 : 0;
+      if (v !== progAnt[i]) { b.style.transform = `scaleX(${v})`; progAnt[i] = v; }
+    });
 
     // etapa 1: o prompt vai sendo digitado
     const n = etapa > 0 ? TXT_PROMPT.length : Math.round(clamp(local / .78, 0, 1) * TXT_PROMPT.length);
-    if (digitaEl.textContent.length !== n) digitaEl.textContent = TXT_PROMPT.slice(0, n);
+    if (n !== nAnt) { digitaEl.textContent = TXT_PROMPT.slice(0, n); nAnt = n; }
     const mostraIa = etapa > 0 || local > .82;
-    bolhaIa.classList.toggle('mostra', mostraIa);
+    if (mostraIa !== mostraAnt) { bolhaIa.classList.toggle('mostra', mostraIa); mostraAnt = mostraIa; }
     const respondeu = etapa > 0 || local > .95;
     if (respondeu !== iaRespondeu) {
       bolhaIa.innerHTML = respondeu ? 'Montando sua cena agora ✱' : '<span class="pontos"><i></i><i></i><i></i></span>';
       iaRespondeu = respondeu;
     }
 
-    // etapa 2: a cena aparece de cima pra baixo
-    const g = etapa > 1 ? 1 : etapa < 1 ? 0 : clamp(local / .85, 0, 1);
-    telaGera.style.setProperty('--g', g.toFixed(4));
-    telaGera.style.setProperty('--scan-op', g >= 1 ? 0 : 1);
-    geraPct.textContent = Math.round(g * 100) + '%';
+    // etapa 2: a cena aparece de cima pra baixo (só transform, sem recalcular layout)
+    const g = etapa > 1 ? 1 : etapa < 1 ? 0 : Math.round(clamp(local / .85, 0, 1) * 1000) / 1000;
+    if (g !== gAnt) {
+      const pc = (g * 100).toFixed(1);
+      geraVeu.style.transform = `translate3d(0,${pc}%,0)`;
+      geraScan.style.transform = `translate3d(0,${(g * telaGera.clientHeight).toFixed(1)}px,0)`;
+      geraScan.style.opacity = g >= 1 ? 0 : 1;
+      geraBarra.style.transform = `scaleX(${g})`;
+      geraPct.textContent = Math.round(g * 100) + '%';
+      gAnt = g;
+    }
 
     // o celular gira de leve com o scroll
-    cel.style.setProperty('--rot', ((q - .5) * -5).toFixed(2) + 'deg');
-    cel.style.setProperty('--ty', ((q - .5) * -30).toFixed(1) + 'px');
+    const tr = `rotate(${((q - .5) * -5).toFixed(2)}deg) translate3d(0,${((q - .5) * -30).toFixed(1)}px,0)`;
+    if (tr !== celAnt2) { cel.style.transform = tr; celAnt2 = tr; }
   }
+
+  /* pausa as animações do celular com a seção fora da tela */
+  new IntersectionObserver(([en]) => processo.classList.toggle('fora', !en.isIntersecting), { rootMargin: '10% 0px' }).observe(processo);
 
   /* =========================================================
      Final: nuvens e ilha
      ========================================================= */
   const finalNuvens = $('[data-nuvens-final]');
+  const derivasFinal = [];
   [[3, 4, 34, 1, 0, 70], [6, 1, 70, 1, -1, 95], [1, 12, 55, .9, 1, 80], [2, 22, 18, .85, 1, 60], [4, 30, 22, .8, -1, 75], [7, 38, 12, .7, 1, 55]]
     .forEach(([n, top, w, a, e, dur], i) => {
       const img = new Image();
       img.src = `img/nuvem-${n}.webp`; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
-      img.style.cssText = `top:${top}%;width:${w}vw;opacity:${a};--sx:${e < 0 ? -1 : 1};--dur:${dur}s;--atraso:${-(dur * ((i * .37) % 1)).toFixed(1)}s`;
+      img.style.cssText = `top:${top}%;width:${w}vw;opacity:${a}`;
+      const sx = e < 0 ? -1 : 1;
+      if (reduz) img.style.transform = `translateX(20vw) scaleX(${sx})`;
+      else {
+        const an = img.animate([{ transform: `translateX(-100%) scaleX(${sx})` }, { transform: `translateX(100vw) scaleX(${sx})` }],
+          { duration: dur * 1000, delay: -dur * 1000 * ((i * .37) % 1), iterations: Infinity, easing: 'linear' });
+        an.pause(); derivasFinal.push(an);
+      }
       finalNuvens.appendChild(img);
     });
   const finalSec = $('#final'), finalIlha = $('#finalIlha');
@@ -372,32 +438,41 @@
   /* =========================================================
      Laço de scroll da parte de baixo
      ========================================================= */
-  let rolPendente = false;
+  new IntersectionObserver(([en]) => {
+    finalSec.classList.toggle('fora', !en.isIntersecting);
+    derivasFinal.forEach(a => en.isIntersecting ? a.play() : a.pause());
+  }, { rootMargin: '10% 0px' }).observe(finalSec);
+
+  let rolPendente = false, ilhaAnt = '';
   function rolagem() {
     rolPendente = false;
-    const ih = window.innerHeight;
+    const ih = telaAltura;
+    // 1) leituras (todas juntas: um cálculo de layout só por quadro)
+    const rf = faixas.map(f => f.el.getBoundingClientRect().top);
+    const rFinal = finalSec.getBoundingClientRect();
+    const rp = processo.getBoundingClientRect();
+    // 2) escritas
     if (!reduz) {
-      faixas.forEach(f => {
-        const r = f.el.getBoundingClientRect();
-        if (r.bottom < -50 || r.top > ih + 50) return;
-        const w = f.span.offsetWidth || 1;
-        const v = (ih - r.top) * .45 * f.dir;
-        const m = ((v % w) + w) % w;
-        f.el.style.transform = `translate3d(${(-m).toFixed(1)}px,0,0)`;
+      faixas.forEach((f, i) => {
+        const top = rf[i];
+        if (top > ih + 50 || top < -300) return;
+        const v = (ih - top) * .45 * f.dir;
+        const m = Math.round((((v % f.w) + f.w) % f.w) * 2) / 2;
+        if (m !== f.x) { f.el.style.transform = `translate3d(${-m}px,0,0)`; f.x = m; }
       });
-      const rf = finalSec.getBoundingClientRect();
-      if (rf.top < ih && rf.bottom > 0) {
-        const k = clamp(1 - rf.top / ih, 0, 1.6);
-        finalIlha.style.transform = `translate3d(0,${((1 - k) * 140).toFixed(1)}px,0) scale(${(.9 + k * .08).toFixed(3)})`;
+      if (rFinal.top < ih && rFinal.bottom > 0) {
+        const k = clamp(1 - rFinal.top / ih, 0, 1.6);
+        const tr = `translate3d(0,${((1 - k) * 140).toFixed(1)}px,0) scale(${(.9 + k * .08).toFixed(3)})`;
+        if (tr !== ilhaAnt) { finalIlha.style.transform = tr; ilhaAnt = tr; }
       }
     }
-    const rp = processo.getBoundingClientRect();
-    if (rp.top < ih && rp.bottom > 0) atualizaProcesso();
+    if (rp.top < ih && rp.bottom > 0) atualizaProcesso(rp);
   }
   const pedeRolagem = () => { if (!rolPendente) { rolPendente = true; requestAnimationFrame(rolagem); } };
   window.addEventListener('scroll', pedeRolagem, { passive: true });
-  window.addEventListener('resize', pedeRolagem);
-  atualizaProcesso(); rolagem();
+  atualizaProcesso(); rolagem(); navSolida(window.scrollY);
+  // a fonte muda a largura das faixas: mede de novo quando ela carregar
+  if (document.fonts) document.fonts.ready.then(() => { faixas.forEach(f => { f.w = f.span.offsetWidth || 1; f.x = null; }); pedeRolagem(); });
 
   /* =========================================================
      Cards: inclinação 3D e brilho seguindo o mouse
@@ -451,6 +526,6 @@
   Promise.race([pronto, new Promise(r => setTimeout(r, 3000))]).then(() => {
     if (reduz) { semEntrada(); return; }
     entrada();
-    requestAnimationFrame(t => { tAnt = t; quadro(t); });
+    liberado = true; ligaQuadro();
   });
 })();

@@ -25,6 +25,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 img { display: block; max-width: none; }
+picture { display: contents; }
 a { color: inherit; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 :focus-visible { outline: 2px solid var(--creme); outline-offset: 3px; border-radius: 6px; }
@@ -98,6 +99,7 @@ a { color: inherit; }
   isolation: isolate;
 }
 .camada, .muro, .sombra, .veu { position: absolute; inset: 0; will-change: transform; }
+.camada, .muro { contain: layout style; }
 .camada > .in { position: absolute; inset: 0; }
 .camada { pointer-events: none; }
 
@@ -119,12 +121,10 @@ a { color: inherit; }
 /* nuvens */
 .nuvem {
   position: absolute; left: 0; top: 0;
-  animation: deriva var(--dur, 60s) linear var(--atraso, 0s) infinite;
   will-change: transform;
 }
 .nuvem img { width: 100%; height: auto; }
 .nuvem.e img { transform: scaleX(-1); }
-@keyframes deriva { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(var(--dx, 100vw), 0, 0); } }
 .longe .nuvem img { filter: saturate(.78) brightness(1.03) contrast(.86) blur(var(--blur, 0px)); }
 .horizonte .nuvem img { filter: saturate(.9) contrast(.92) blur(var(--blur, 0px)); }
 .muro .nuvem img { filter: brightness(1.07) saturate(.85) blur(var(--blur, 0px)); }
@@ -166,7 +166,7 @@ a { color: inherit; }
 }
 
 /* sombra de nuvem para leitura (parada) */
-.sombra { will-change: auto; pointer-events: none; }
+.sombra { will-change: opacity; pointer-events: none; }
 .sombra-in {
   position: absolute; inset: 0;
   background:
@@ -186,6 +186,7 @@ a { color: inherit; }
   text-shadow: 0 1px 8px rgba(20, 35, 58, .45);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
+  will-change: opacity;
 }
 .hud b { font-weight: 400; }
 .hud-esq { left: var(--margem); }
@@ -198,6 +199,7 @@ a { color: inherit; }
   align-items: end; align-content: end; gap: 0 3vw;
   padding: 0 var(--margem) 7.4svh;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .texto a { pointer-events: auto; }
 .nome {
@@ -207,10 +209,10 @@ a { color: inherit; }
 }
 .linha { display: inline-block; overflow: hidden; padding-top: .06em; padding-right: .05em; padding-bottom: .22em; white-space: nowrap; vertical-align: bottom; }
 .letras { display: inline-block; }
-.letras span { display: inline-block; will-change: transform; }
+.letras span { display: inline-block; }
 .aster { display: inline-block; width: .29em; height: .29em; vertical-align: .43em; margin-left: .04em; }
 .aster svg { width: 100%; height: 100%; fill: var(--creme); overflow: visible; }
-.aster g { transform-origin: 0 0; animation: gira 48s linear infinite; }
+.aster svg { animation: gira 48s linear infinite; will-change: transform; }
 @keyframes gira { to { transform: rotate(360deg); } }
 
 .lado { display: flex; flex-direction: column; align-items: flex-start; gap: 22px; padding-bottom: .6svh; }
@@ -227,7 +229,7 @@ a { color: inherit; }
   text-shadow: 0 1px 8px rgba(20, 35, 58, .4);
 }
 
-.pausa .nuvem, .pausa .flutua, .pausa .aster g { animation-play-state: paused; }
+.pausa .flutua, .pausa .aster svg { animation-play-state: paused; }
 
 /* estado inicial antes da entrada (o JS troca) */
 .pre .palco .in, .pre .sombra-in, .pre .hud, .pre .dica, .pre .lado, .pre .aster { opacity: 0; }
@@ -307,7 +309,7 @@ a { color: inherit; }
 .dados dd { margin: 0; font-size: clamp(1.05rem, 1.5vw, 1.45rem); font-weight: 520; letter-spacing: -.02em; }
 
 /* faixas de texto que andam com o scroll */
-.faixas { background: var(--creme-2); padding: clamp(70px, 9vw, 130px) 0 clamp(20px, 3vw, 40px); overflow: hidden; }
+.faixas { background: var(--creme-2); padding: clamp(70px, 9vw, 130px) 0 clamp(20px, 3vw, 40px); overflow: hidden; contain: paint; }
 .faixa { white-space: nowrap; font-size: clamp(3.2rem, 9vw, 9.5rem); font-weight: 560; letter-spacing: -.055em; line-height: 1.02; will-change: transform; }
 .faixa span { display: inline-block; }
 .faixa-2 { color: transparent; -webkit-text-stroke: 1.5px var(--tinta); opacity: .5; }
@@ -333,16 +335,17 @@ a { color: inherit; }
 .etapas p { margin: 8px 0 0; color: var(--tinta-2); line-height: 1.5; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .7s var(--expo), opacity .5s; }
 .etapas li.ativa p { max-height: 8em; opacity: 1; }
 .barra { position: absolute; left: 0; right: 0; top: -1px; height: 2px; }
-.barra i { display: block; height: 100%; background: var(--tinta); transform: scaleX(var(--prog, 0)); transform-origin: 0 50%; }
+.barra i { display: block; height: 100%; background: var(--tinta); transform: scaleX(0); transform-origin: 0 50%; }
 
 .celular {
   position: relative; height: min(82svh, 760px); aspect-ratio: 9 / 19.2;
   border-radius: 48px; padding: 11px; background: var(--tinta);
   box-shadow: 0 40px 80px -20px rgba(20, 35, 58, .45), 0 0 0 1px rgba(20, 35, 58, .2), inset 0 0 0 2px #2a3a52;
-  transform: rotate(var(--rot, 0deg)) translateY(var(--ty, 0px));
+  will-change: transform;
 }
 .cel-ilha { position: absolute; top: 22px; left: 50%; width: 30%; height: 24px; border-radius: 99px; background: #0b1424; transform: translateX(-50%); }
-.cel-tela { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--creme); }
+.cel-tela { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--creme); contain: layout paint; }
+.tela:not(.ativa) *, .processo.fora .celular * { animation-play-state: paused !important; }
 .tela { position: absolute; inset: 0; opacity: 0; transform: scale(1.04); transition: opacity .7s var(--expo), transform .9s var(--expo); }
 .tela.ativa { opacity: 1; transform: none; }
 
@@ -368,15 +371,15 @@ a { color: inherit; }
 .gera-nuvem.n3 { width: 210%; left: -55%; bottom: 4%; animation: nuvem-cel 26s linear infinite alternate; }
 @keyframes nuvem-cel { to { transform: translateX(14%); } }
 .gera-ilha, .post-ilha { position: absolute; left: 50%; top: 46%; width: 150%; height: auto; transform: translate(-50%, -50%); }
-.gera-veu { position: absolute; left: 0; right: 0; bottom: 0; top: calc(var(--g, 0) * 100%); background: rgba(243, 227, 200, .55); -webkit-backdrop-filter: blur(9px) grayscale(.9); backdrop-filter: blur(9px) grayscale(.9); }
-.gera-scan { position: absolute; left: 0; right: 0; height: 3px; top: calc(var(--g, 0) * 100% - 1px); background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 22px 6px rgba(255, 255, 255, .7); opacity: var(--scan-op, 1); }
+.gera-veu { position: absolute; inset: 0; transform: translate3d(0, 0, 0); will-change: transform; background: rgba(243, 227, 200, .55); -webkit-backdrop-filter: blur(9px) grayscale(.9); backdrop-filter: blur(9px) grayscale(.9); }
+.gera-scan { position: absolute; left: 0; right: 0; height: 3px; top: -1px; will-change: transform, opacity; background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 22px 6px rgba(255, 255, 255, .7); }
 .gera-status {
   position: absolute; left: 12px; right: 12px; bottom: 14px; display: grid; grid-template-columns: 1fr auto; gap: 8px;
   padding: 12px 14px; border-radius: 16px; background: rgba(250, 246, 238, .78); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   font: 400 12px/1 var(--mono); color: var(--tinta);
 }
 .gera-barra { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: rgba(20, 35, 58, .12); overflow: hidden; }
-.gera-barra i { display: block; height: 100%; background: var(--tinta); transform: scaleX(var(--g, 0)); transform-origin: 0 50%; }
+.gera-barra i { display: block; height: 100%; background: var(--tinta); transform: scaleX(0); transform-origin: 0 50%; }
 .post-ilha { animation: orbita 9s ease-in-out infinite alternate; }
 @keyframes orbita { from { transform: translate(-52%, -50%) scale(1) rotate(-1deg); } to { transform: translate(-48%, -52%) scale(1.08) rotate(1deg); } }
 .post-lado { position: absolute; right: 12px; bottom: 110px; display: flex; flex-direction: column; gap: 16px; }
@@ -451,13 +454,13 @@ a { color: inherit; }
   background: linear-gradient(180deg, var(--creme-2) 0%, var(--ceu-5) 22%, var(--ceu-4) 40%, var(--ceu-3) 60%, var(--ceu-2) 80%, var(--ceu-1) 100%);
 }
 .final-nuvens { position: absolute; inset: 0; pointer-events: none; }
-.final-nuvens img { position: absolute; left: 0; height: auto; animation: deriva-final var(--dur, 80s) linear var(--atraso, 0s) infinite; }
-@keyframes deriva-final { from { transform: translateX(-100%) scaleX(var(--sx, 1)); } to { transform: translateX(100vw) scaleX(var(--sx, 1)); } }
+.final-nuvens img { position: absolute; left: 0; height: auto; will-change: transform; }
 .final-conteudo { position: relative; z-index: 2; text-align: center; padding: 26svh var(--margem) 0; display: flex; flex-direction: column; align-items: center; }
 .final-titulo { margin: 0 0 34px; font-weight: 540; font-size: clamp(2.4rem, 6.4vw, 7rem); letter-spacing: -.055em; line-height: .98; max-width: 11em; color: var(--tinta); }
 .final .rotulo { color: var(--tinta-2); }
 .final-ilha { position: relative; z-index: 1; width: min(62vw, 820px); margin: 9svh auto 2svh; will-change: transform; }
 .final-ilha img { width: 100%; height: auto; animation: flutua 7.5s ease-in-out infinite alternate; filter: saturate(.92); }
+.final.fora .final-ilha img { animation-play-state: paused; }
 .rodape {
   position: relative; z-index: 2; margin-top: auto;
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px;
@@ -534,9 +537,28 @@ a { color: inherit; }
   .final-ilha { width: 96vw; margin-top: 6svh; }
 }
 
+/* ===== Telas de toque (celular e tablet): sem efeitos caros de GPU ===== */
+@media (hover: none), (pointer: coarse), (max-width: 760px) {
+  /* grão com mistura por cima da página inteira: o que mais travava a rolagem */
+  .grao { display: none; }
+  /* desfoque de fundo vira cor sólida (mesma aparência, custo quase zero) */
+  .nav { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(20, 35, 58, .82); }
+  .chip { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(250, 246, 238, .94); }
+  .gera-veu { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(232, 222, 208, .86); }
+  .gera-status { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(250, 246, 238, .94); }
+  .post-ico { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(20, 35, 58, .5); }
+  .ilha-nevoa { filter: none; }
+  .serra { filter: none; }
+  .card { transform-style: flat; }
+  .cards { perspective: none; }
+  .brilho { display: none; }
+  .faq summary:hover { padding-left: 0; }
+  .ilha-tom { -webkit-mask-image: url(../img/ilha-m.webp); mask-image: url(../img/ilha-m.webp); }
+}
+
 /* ===== Movimento reduzido ===== */
 @media (prefers-reduced-motion: reduce) {
-  .nuvem, .flutua, .aster g, .grao, .chip, .caret, .final-nuvens img, .final-ilha img, .post-ilha, .gera-nuvem, .post-progresso i, .pontos i { animation: none !important; }
+  .nuvem, .flutua, .aster svg, .grao, .chip, .caret, .final-nuvens img, .final-ilha img, .post-ilha, .gera-nuvem, .post-progresso i, .pontos i { animation: none !important; }
   .hero { height: auto; }
   .palco { position: relative; height: 100svh; }
   .fecho { margin-top: 0; padding-top: clamp(80px, 11vw, 160px); background: var(--creme-2); }
