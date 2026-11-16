@@ -32,3 +32,5 @@ Para testar no PC: abra a pasta no VS Code e use a extensão Live Server
 No celular o site desliga os efeitos que pesam na GPU (grão animado e desfoque de fundo)
 e troca por cores sólidas com a mesma aparência. Se for adicionar efeitos novos, evite
 `backdrop-filter`, `mix-blend-mode` e animar `top`/`height` — use `transform` e `opacity`.
+
+Depois de mudar CSS ou JS, aumente o número em `?v=3` no `index.html` (ex.: `?v=4`) pra quem já visitou ver a versão nova na hora.
